@@ -118,6 +118,25 @@ const certifications = [
   ["SQL Using AI", "AI For Techies"],
 ];
 
+const contactEmail = "pratikkokane0627@gmail.com";
+
+const buildMailtoLink = (data) => {
+  const name = data.get("name")?.trim();
+  const email = data.get("email")?.trim();
+  const subject = data.get("subject")?.trim();
+  const message = data.get("message")?.trim();
+  const body = [
+    message,
+    "",
+    `Name: ${name}`,
+    `Email: ${email}`,
+  ].join("\n");
+
+  return `mailto:${contactEmail}?subject=${encodeURIComponent(
+    `Portfolio Contact: ${subject}`
+  )}&body=${encodeURIComponent(body)}`;
+};
+
 function useTypedText(words) {
   const [wordIndex, setWordIndex] = useState(0);
   const [text, setText] = useState("");
@@ -559,6 +578,8 @@ function Contact() {
       return;
     }
 
+    const fallbackEmailLink = buildMailtoLink(data);
+
     data.append("_subject", `Portfolio Contact: ${data.get("subject")}`);
     data.append("_template", "table");
     data.append("_captcha", "false");
@@ -566,7 +587,7 @@ function Contact() {
     setSubmitting(true);
 
     try {
-      const response = await fetch("https://formsubmit.co/ajax/pratikkokane0627@gmail.com", {
+      const response = await fetch(`https://formsubmit.co/ajax/${contactEmail}`, {
         method: "POST",
         body: data,
         headers: {
@@ -583,7 +604,8 @@ function Contact() {
       event.currentTarget.reset();
     } catch {
       setStatus("error");
-      setMessage("Unable to send right now. Please email me directly at pratikkokane0627@gmail.com.");
+      setMessage("Email service is not available right now. Opening your email app with this message ready to send.");
+      window.location.href = fallbackEmailLink;
     } finally {
       setSubmitting(false);
     }
@@ -601,7 +623,7 @@ function Contact() {
               Feel free to contact me anytime.
             </p>
             <div className="contact-list">
-              <ContactItem icon="fa-envelope" label="Email" value="pratikkokane0627@gmail.com" href="mailto:pratikkokane0627@gmail.com" />
+              <ContactItem icon="fa-envelope" label="Email" value={contactEmail} href={`mailto:${contactEmail}`} />
               <ContactItem icon="fa-phone" label="Phone" value="+91 9370396371" href="tel:+919370396371" />
               <ContactItem icon="fa-location-dot" label="Location" value="Sangli, Maharashtra, India" />
             </div>
@@ -653,7 +675,7 @@ function Contact() {
             <button className="contact-submit" type="submit" disabled={submitting}>
               {submitting ? "Sending..." : "Send Message"}
             </button>
-            <p className="contact-note">Messages are delivered to pratikkokane0627@gmail.com.</p>
+            <p className="contact-note">Messages are delivered to {contactEmail}.</p>
           </form>
         </div>
       </div>
