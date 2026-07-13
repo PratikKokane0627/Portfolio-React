@@ -520,16 +520,42 @@ function Certifications() {
 
 function Contact() {
   const [message, setMessage] = useState("");
+  const [status, setStatus] = useState("idle");
+  const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+
+  const validateContactForm = (data) => {
+    const nextErrors = {};
+    const email = data.get("email")?.trim() || "";
+    const messageText = data.get("message")?.trim() || "";
+
+    ["name", "email", "subject", "message"].forEach((field) => {
+      if (!data.get(field)?.trim()) nextErrors[field] = "Required";
+    });
+
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      nextErrors.email = "Enter a valid email";
+    }
+
+    if (messageText && messageText.length < 12) {
+      nextErrors.message = "Write at least 12 characters";
+    }
+
+    return nextErrors;
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setMessage("");
+    setStatus("idle");
+    setErrors({});
     const data = new FormData(event.currentTarget);
-    const hasEmpty = ["name", "email", "subject", "message"].some((field) => !data.get(field)?.trim());
+    const nextErrors = validateContactForm(data);
 
-    if (hasEmpty) {
-      setMessage("Please fill all fields.");
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      setStatus("error");
+      setMessage("Please check the highlighted fields.");
       return;
     }
 
@@ -552,9 +578,11 @@ function Contact() {
         throw new Error("Email service failed");
       }
 
+      setStatus("success");
       setMessage("Thank you! Your message has been sent.");
       event.currentTarget.reset();
     } catch {
+      setStatus("error");
       setMessage("Unable to send right now. Please email me directly at pratikkokane0627@gmail.com.");
     } finally {
       setSubmitting(false);
@@ -565,14 +593,14 @@ function Contact() {
     <section id="contact" className="bg-black">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <SectionTitle>Contact Me</SectionTitle>
-        <div className="grid gap-12 lg:grid-cols-2">
-          <div className="reveal" data-reveal>
+        <div className="contact-grid">
+          <div className="contact-panel reveal" data-reveal>
             <h3 className="mb-6 text-3xl font-bold">Let's Build Something Amazing</h3>
             <p className="mb-10 leading-8 text-gray-400">
               I'm always interested in new opportunities, freelance work and exciting projects.
               Feel free to contact me anytime.
             </p>
-            <div className="space-y-8">
+            <div className="contact-list">
               <ContactItem icon="fa-envelope" label="Email" value="pratikkokane0627@gmail.com" href="mailto:pratikkokane0627@gmail.com" />
               <ContactItem icon="fa-phone" label="Phone" value="+91 9370396371" href="tel:+919370396371" />
               <ContactItem icon="fa-location-dot" label="Location" value="Sangli, Maharashtra, India" />
@@ -580,12 +608,48 @@ function Contact() {
             <SocialLinks className="mt-10 text-3xl" />
           </div>
 
-          <form className="portfolio-card space-y-6 p-10 reveal" data-reveal onSubmit={handleSubmit}>
-            <input name="name" type="text" placeholder="Your Name" required />
-            <input name="email" type="email" placeholder="Email Address" required />
-            <input name="subject" type="text" placeholder="Subject" required />
-            <textarea name="message" rows="6" placeholder="Message" required />
-            {message && <p className="contact-status">{message}</p>}
+          <form className="portfolio-card contact-form reveal" data-reveal onSubmit={handleSubmit} noValidate>
+            <div className="form-grid">
+              <FormField label="Name" error={errors.name}>
+                <input
+                  aria-invalid={Boolean(errors.name)}
+                  autoComplete="name"
+                  name="name"
+                  placeholder="Your name"
+                  required
+                  type="text"
+                />
+              </FormField>
+              <FormField label="Email" error={errors.email}>
+                <input
+                  aria-invalid={Boolean(errors.email)}
+                  autoComplete="email"
+                  name="email"
+                  placeholder="you@example.com"
+                  required
+                  type="email"
+                />
+              </FormField>
+            </div>
+            <FormField label="Subject" error={errors.subject}>
+              <input
+                aria-invalid={Boolean(errors.subject)}
+                name="subject"
+                placeholder="Project, opportunity, or question"
+                required
+                type="text"
+              />
+            </FormField>
+            <FormField label="Message" error={errors.message}>
+              <textarea
+                aria-invalid={Boolean(errors.message)}
+                name="message"
+                placeholder="Tell me what you want to build"
+                required
+                rows="6"
+              />
+            </FormField>
+            {message && <p className={`contact-status ${status}`}>{message}</p>}
             <button className="contact-submit" type="submit" disabled={submitting}>
               {submitting ? "Sending..." : "Send Message"}
             </button>
@@ -597,18 +661,30 @@ function Contact() {
   );
 }
 
+function FormField({ label, error, children }) {
+  return (
+    <label className={`form-field ${error ? "has-error" : ""}`}>
+      <span>
+        {label}
+        {error && <small>{error}</small>}
+      </span>
+      {children}
+    </label>
+  );
+}
+
 function ContactItem({ icon, label, value, href }) {
   const content = href ? (
-    <a href={href} className="text-xl hover:text-indigo-400">
+    <a href={href} className="contact-value hover:text-indigo-400">
       {value}
     </a>
   ) : (
-    <h4 className="text-xl">{value}</h4>
+    <h4 className="contact-value">{value}</h4>
   );
 
   return (
-    <div className="flex items-center gap-5">
-      <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-indigo-600">
+    <div className="contact-item">
+      <div className="contact-item-icon">
         <i className={`fa-solid ${icon} text-xl`} />
       </div>
       <div>
