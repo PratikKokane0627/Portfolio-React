@@ -296,7 +296,7 @@ function SectionTitle({ children }) {
 function Hero() {
   const typed = useTypedText(
     useMemo(
-      () => ["MERN Stack Developer", "Frontend Developer", "Backend Developer", "Full Stack Developer"],
+      () => ["MERN Stack Developer", "Frontend Developer", "Backend Developer", "web Developer"],
       []
     )
   );
