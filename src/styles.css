@@ -159,8 +159,20 @@ textarea:focus {
   border-radius: 12px;
   display: inline-flex;
   justify-content: center;
+  overflow: hidden;
   padding: 1rem 2rem;
+  position: relative;
   text-align: center;
+}
+
+.btn-primary::before,
+.btn-outline::before {
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+  content: "";
+  inset: 0;
+  position: absolute;
+  transform: translateX(-120%);
+  transition: transform 0.65s ease;
 }
 
 .btn-primary {
@@ -174,6 +186,24 @@ textarea:focus {
 .btn-primary:hover,
 .btn-outline:hover {
   box-shadow: 0 15px 35px rgba(99, 102, 241, 0.35);
+}
+
+.btn-primary:hover::before,
+.btn-outline:hover::before {
+  transform: translateX(120%);
+}
+
+.hero-copy {
+  --reveal-distance: 28px;
+}
+
+.hero-kicker,
+.hero-title,
+.hero-role,
+.hero-summary,
+.hero-actions,
+.hero-visual {
+  --reveal-distance: 24px;
 }
 
 .hero-photo {
@@ -260,6 +290,7 @@ textarea:focus {
 }
 
 .skill-icon-card {
+  --reveal-distance: 34px;
   align-items: center;
   aspect-ratio: 1.18 / 1;
   background: rgba(17, 19, 31, 0.96);
@@ -519,10 +550,15 @@ textarea:focus {
 }
 
 .contact-submit {
+  align-items: center;
   background: #4f46e5;
   border-radius: 12px;
   color: #fff;
+  display: inline-flex;
   font-weight: 800;
+  gap: 0.65rem;
+  justify-content: center;
+  min-height: 56px;
   padding: 1rem;
   transition: 0.3s;
   width: 100%;
@@ -537,6 +573,16 @@ textarea:focus {
   cursor: not-allowed;
   opacity: 0.65;
   transform: none;
+}
+
+.submit-spinner {
+  animation: spin 0.8s linear infinite;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 999px;
+  display: inline-block;
+  height: 1rem;
+  width: 1rem;
 }
 
 .contact-grid {
@@ -634,8 +680,10 @@ textarea:focus {
 
 [data-reveal] {
   opacity: 0;
-  transform: translateY(38px);
-  transition: opacity 0.75s ease, transform 0.75s ease;
+  transform: translateY(var(--reveal-distance, 38px));
+  transition:
+    opacity 0.75s ease var(--reveal-delay, 0ms),
+    transform 0.75s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms);
 }
 
 [data-reveal].is-visible {
@@ -849,6 +897,12 @@ body.light-theme .mouse-glow {
 @keyframes blink {
   50% {
     opacity: 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -1102,6 +1156,23 @@ body.light-theme .mouse-glow {
 
   .skills-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
   }
 }
 

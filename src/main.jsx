@@ -307,23 +307,23 @@ function Hero() {
       <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-purple-700 opacity-20 blur-[180px]" />
 
       <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-16 px-6 pt-20 lg:grid-cols-2 lg:px-8">
-        <div className="reveal" data-reveal>
-          <p className="mb-3 uppercase tracking-[5px] text-indigo-400">Welcome to my portfolio</p>
-          <h1 className="text-6xl font-black leading-tight lg:text-7xl">
+        <div className="hero-copy reveal" data-reveal>
+          <p className="hero-kicker mb-3 uppercase tracking-[5px] text-indigo-400" data-reveal data-delay="80">Welcome to my portfolio</p>
+          <h1 className="hero-title text-6xl font-black leading-tight lg:text-7xl" data-reveal data-delay="170">
             Hi, I'm <span className="text-indigo-500">Pratik Kokane</span>
           </h1>
-          <h2 className="mt-6 text-3xl font-semibold text-indigo-300">
+          <h2 className="hero-role mt-6 text-3xl font-semibold text-indigo-300" data-reveal data-delay="260">
             {typed}
             <span className="typed-cursor">|</span>
           </h2>
-          <p className="mt-8 max-w-2xl text-lg leading-8 text-gray-400">
+          <p className="hero-summary mt-8 max-w-2xl text-lg leading-8 text-gray-400" data-reveal data-delay="350">
             I build modern, scalable full-stack web applications using the MERN stack,
             delivering seamless user experiences and efficient backend solutions. Focused on
             creating responsive interfaces and robust APIs that solve real-world problems with
             clean, reliable code.
           </p>
 
-          <div className="mt-10 flex flex-wrap gap-5">
+          <div className="hero-actions mt-10 flex flex-wrap gap-5" data-reveal data-delay="440">
             <a className="btn-primary" href="#projects">
               View Projects
             </a>
@@ -332,10 +332,12 @@ function Hero() {
             </a>
           </div>
 
-          <SocialLinks className="mt-12 text-3xl" />
+          <div data-reveal data-delay="520">
+            <SocialLinks className="mt-12 text-3xl" />
+          </div>
         </div>
 
-        <div className="flex justify-center reveal" data-reveal>
+        <div className="hero-visual flex justify-center reveal" data-reveal data-delay="300">
           <div className="relative">
             <div className="absolute inset-0 animate-pulse rounded-full bg-indigo-600 opacity-30 blur-3xl" />
             <img
@@ -432,8 +434,14 @@ function Skills() {
         </div>
 
         <div className="skills-grid">
-          {skills.map((skill) => (
-            <article className="skill-icon-card" data-reveal data-skill={skill.name} key={skill.name}>
+          {skills.map((skill, index) => (
+            <article
+              className="skill-icon-card"
+              data-reveal
+              data-delay={String((index % 7) * 70)}
+              data-skill={skill.name}
+              key={skill.name}
+            >
               <div className="skill-icon" style={{ color: skill.color }}>
                 {skill.label ? <span>{skill.label}</span> : <i className={skill.icon} />}
               </div>
@@ -673,7 +681,8 @@ function Contact() {
             </FormField>
             {message && <p className={`contact-status ${status}`}>{message}</p>}
             <button className="contact-submit" type="submit" disabled={submitting}>
-              {submitting ? "Sending..." : "Send Message"}
+              {submitting && <span className="submit-spinner" aria-hidden="true" />}
+              <span>{submitting ? "Sending..." : "Send Message"}</span>
             </button>
             <p className="contact-note">Messages are delivered to {contactEmail}.</p>
           </form>
@@ -781,7 +790,10 @@ function RevealObserver() {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) entry.target.classList.add("is-visible");
+          if (!entry.isIntersecting) return;
+          const delay = entry.target.dataset.delay || "0";
+          entry.target.style.setProperty("--reveal-delay", `${delay}ms`);
+          entry.target.classList.add("is-visible");
         });
       },
       { threshold: 0.15 }
